@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "Login Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Login</h1>
+    <form id="loginForm" method="post">
+        <div class="form-group">
+            <label for="email">email</label>
+            <input type="text" class="form-control" id="email" placeholder="Enter email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" placeholder="Password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#loginForm').submit(function (event) {
+            event.preventDefault(); // Prevent the form from submitting the default way
+
+            const email = $('#email').val();
+            const password = $('#password').val();
+
+            $.ajax({
+                url: 'https://localhost:7113/api/Auth/login', // Replace with your login API endpoint
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ email: email, password: password }),
+                success: function (data) {
+                    // Save JWT token to cookies
+                    document.cookie = "jwtToken=" + data.token + "; path=/"; // Adjust the cookie settings as necessary
+                    alert("Login successful!");
+                    // Optionally redirect to a different page
+                    window.location.href = "/Home"; // Redirect to a home page or dashboard
+                },
+                error: function (xhr, status, error) {
+                    console.error('Login error:', error);
+                    alert('Login failed. Please check your credentials and try again.');
+                }
+            });
+        });
+    });
+</script>
+

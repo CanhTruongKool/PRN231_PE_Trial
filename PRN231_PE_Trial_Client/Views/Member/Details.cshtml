@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "Member Details";
+}
+
+<h1>Member Details</h1>
+<div id="memberDetails">
+    <!-- Member details will be populated here -->
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var memberId = @ViewData["MemberId"]; // Get the member ID from ViewData
+
+        // AJAX call to fetch member details
+        $.ajax({
+            url: `https://localhost:7113/Members/Get/${memberId}`, // Use the member ID in the URL
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + getJwtToken() // Assuming you have a function to get the token
+            },
+            success: function (data) {
+                // Populate member details
+                var member = data;
+                $('#memberDetails').append(`
+                    <h4>${member.fullname}</h4>
+                    <p>Email: ${member.email}</p>
+                    <p>Company Name: ${member.companyName}</p>
+                    <p>City: ${member.city}</p>
+                    <p>Country: ${member.country}</p>
+                `);
+            },
+            error: function () {
+                alert('Error loading member details.');
+            }
+        });
+    });
+
+    function getJwtToken() {
+        // Function to get the JWT token from cookies or local storage
+        return document.cookie.split('; ').find(row => row.startsWith('jwtToken=')).split('=')[1];
+    }
+</script>
+
+<div>
+    <a asp-action="Index" class="btn btn-primary">Back to List</a>
+</div>

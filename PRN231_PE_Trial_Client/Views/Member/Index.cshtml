@@ -1,0 +1,88 @@
+﻿@{
+    ViewData["Title"] = "Members List";
+}
+
+<h1>Members</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Fullname</th>
+            <th>Email</th>
+            <th>Company Name</th>
+            <th>City</th>
+            <th>Country</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="membersTableBody">
+        <!-- Members will be populated here by AJAX -->
+    </tbody>
+</table>
+
+<div>
+    <a href="/Member/Create" class="btn btn-primary">Add New Member</a>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            loadMembers();
+
+            function loadMembers() {
+                $.ajax({
+                    url: 'https://localhost:7113/odata/Members',
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + getJwtToken() // Include the JWT token if required
+                    },
+                    success: function (data) {
+                        const members = data.value;
+                        $('#membersTableBody').empty();
+                        members.forEach(member => {
+                            $('#membersTableBody').append(`
+                                        <tr>
+                                            <td>${member.Fullname}</td>
+                                            <td>${member.Email}</td>
+                                            <td>${member.CompanyName}</td>
+                                            <td>${member.City}</td>
+                                            <td>${member.Country}</td>
+                                            <td>
+                                                <a href="/Member/Details/${member.MemberId}" class="btn btn-info">Details</a>
+                                                <a href="/Member/Update/${member.MemberId}" class="btn btn-warning">Edit</a>
+                                                <button class="btn btn-danger" onclick="deleteMember(${member.MemberId})">Delete</button>
+                                            </td>
+                                        </tr>
+                                    `);
+                        });
+                    },
+                    error: function () {
+                        alert('Error loading members.');
+                    }
+                });
+            }
+
+            window.deleteMember = function (memberId) {
+                if (confirm('Are you sure you want to delete this member ' + memberId + ' ?')) {
+                    $.ajax({
+                        url: `https://localhost:7113/Members/Delete/` + memberId,
+                        headers: {
+                            'Authorization': 'Bearer ' + getJwtToken() // Add the token to the Authorization header
+                        },
+                        method: 'DELETE',
+                        success: function () {
+                            loadMembers(); // Refresh the list
+                        },
+                        error: function () {
+                            alert('Error deleting member.');
+                        }
+                    });
+                }
+            };
+        });
+        function getJwtToken() {
+            // Function to get the JWT token from cookies or local storage
+            return document.cookie.split('; ').find(row => row.startsWith('jwtToken=')).split('=')[1];
+        }
+    </script>
+}

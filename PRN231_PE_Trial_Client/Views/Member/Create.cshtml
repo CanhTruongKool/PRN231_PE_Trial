@@ -1,0 +1,70 @@
+﻿@{
+    ViewData["Title"] = "Create Member";
+}
+
+<h1>Create Member</h1>
+
+<form id="createMemberForm">
+    <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" class="form-control" name="Fullname" required />
+    </div>
+    <div class="form-group">
+        <label>Email</label>
+        <input type="email" class="form-control" name="Email" required />
+    </div>
+    <div class="form-group">
+        <label>Company Name</label>
+        <input type="text" class="form-control" name="CompanyName" required />
+    </div>
+    <div class="form-group">
+        <label>City</label>
+        <input type="text" class="form-control" name="City" required />
+    </div>
+    <div class="form-group">
+        <label>Country</label>
+        <input type="text" class="form-control" name="Country" required />
+    </div>
+    <div class="form-group">
+        <label>Password</label>
+        <input type="text" class="form-control" name="Password" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+
+@section Scripts {
+    <script>
+        $('#createMemberForm').submit(function(e) {
+            e.preventDefault();
+
+            // Serialize form data and convert to JSON format
+            const memberData = $(this).serializeArray().reduce((obj, item) => {
+                obj[item.name] = item.value;
+                return obj;
+            }, {});
+
+            // Convert the memberData object to a JSON string
+            const jsonData = JSON.stringify(memberData);
+            alert(jsonData);
+            $.ajax({
+                url: 'https://localhost:7113/odata/Members',
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + getJwtToken(),// Add the token to the Authorization header
+                    'Content-Type': 'application/json'
+                },
+                data: jsonData,
+                success: function() {
+                    window.location.href = '/Member'; // Redirect to the list
+                },
+                error: function() {
+                    alert('Error creating member.');
+                }
+            });
+        });
+        function getJwtToken() {
+            // Function to get the JWT token from cookies or local storage
+            return document.cookie.split('; ').find(row => row.startsWith('jwtToken=')).split('=')[1];
+        }
+    </script>
+}

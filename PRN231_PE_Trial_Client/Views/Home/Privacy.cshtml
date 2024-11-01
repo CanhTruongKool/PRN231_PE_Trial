@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Privacy Policy";
+}
+<h1>@ViewData["Title"]</h1>
+
+<p>Use this page to detail your site's privacy policy.</p>
+@section Scripts {
+    <script>
+        // Function to delete a cookie by name
+        function deleteCookie(name) {
+            document.cookie = name + '=; Max-Age=0; path=/'; // Set Max-Age to 0 to delete the cookie
+        }
+
+        // Call the function to delete the specific cookie
+        window.onload = function () {
+            deleteCookie('jwtToken'); // Replace 'jwtToken' with the actual name of your cookie
+        };
+    </script>
+}

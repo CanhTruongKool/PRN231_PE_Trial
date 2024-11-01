@@ -1,0 +1,100 @@
+﻿@model PRN231_PE_Trial_Client.Models.PRN231_PE_Trial_Client.Models.Member;
+@{
+    ViewData["Title"] = "Edit Member";
+}
+
+<h1>Edit Member</h1>
+
+<form id="editMemberForm">
+    <input type="hidden" name="MemberId" value="@ViewData["MemberId"]" />
+    <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" class="form-control" name="Fullname" required />
+    </div>
+    <div class="form-group">
+        <label>Email</label>
+        <input type="email" class="form-control" name="Email" required />
+    </div>
+    <div class="form-group">
+        <label>Company Name</label>
+        <input type="text" class="form-control" name="CompanyName" required />
+    </div>
+    <div class="form-group">
+        <label>City</label>
+        <input type="text" class="form-control" name="City" required />
+    </div>
+    <div class="form-group">
+        <label>Country</label>
+        <input type="text" class="form-control" name="Country" required />
+    </div>
+    <div class="form-group">
+        <label>Password</label>
+        <input type="text" class="form-control" name="Password" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            const memberId = $('input[name="MemberId"]').val();
+            loadMemberData(memberId); // Load member data on page load
+
+            $('#editMemberForm').submit(function (e) {
+                e.preventDefault();
+
+                const memberData = $(this).serialize();
+
+                $.ajax({
+                    url: `https://localhost:7113/Members/Update`, // Use OData format
+                    headers: {
+                        'Authorization': 'Bearer ' + getJwtToken(), // Include the JWT token if required
+                        'Content-Type': 'application/json' // Ensure the content type is set for JSON
+                    },
+                    method: 'PUT',
+                    data: JSON.stringify({
+                        MemberId: memberId,
+                        ...$(this).serializeArray().reduce((obj, item) => {
+                            obj[item.name] = item.value;
+                            return obj;
+                        }, {})
+                    }), // Convert data to JSON format
+                    success: function () {
+                        window.location.href = '/Member'; // Redirect to the list
+                    },
+                    error: function () {
+                        alert('Error updating member.');
+                    }
+                });
+            });
+        });
+
+        function loadMemberData(memberId) {
+            $.ajax({
+                url: `https://localhost:7113/Members/Get/${memberId}`,
+                headers: {
+                    'Authorization': 'Bearer ' + getJwtToken() // Include the JWT token if required
+                },
+                method: 'GET',
+                success: function (data) {
+                    // Fill the form fields with the retrieved data
+                    $('input[name="Fullname"]').val(data.fullname);
+                    $('input[name="Email"]').val(data.email);
+                    $('input[name="CompanyName"]').val(data.companyName);
+                    $('input[name="City"]').val(data.city);
+                    $('input[name="Country"]').val(data.country);
+                    $('input[name="Password"]').val(data.password);
+                },
+                error: function () {
+                    alert('Error loading member data.');
+                }
+            });
+        }
+
+        function getJwtToken() {
+            // Function to get the JWT token from cookies or local storage
+            const token = document.cookie.split('; ').find(row => row.startsWith('jwtToken='));
+            return token ? token.split('=')[1] : null; // Ensure null is returned if token doesn't exist
+        }
+    </script>
+}
